@@ -1,1 +1,1 @@
-Aici se va lucra pentru server
+# Folder-ul pentru server
