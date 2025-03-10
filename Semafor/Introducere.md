@@ -1,0 +1,1 @@
+# Folder-ul pentru semafor
