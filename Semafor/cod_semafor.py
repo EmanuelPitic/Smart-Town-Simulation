@@ -9,8 +9,8 @@ import time
 #GP5-- bluetooth rx
 
 #m d1 ;m d2 ;s d1 r 10 y 5 g 10 ;s d2 r 10 y 5 g 10 ;i 10 ;
-function_mode=3 # 1--manual, only one direction stays on ; 2--secvential, incepand de la directia data, cu timpii  trimisi sau default; 3-- inteligent,
-direction="d2" #sau d2
+function_mode=2 # 1--manual, only one direction stays on ; 2--secvential, incepand de la directia data, cu timpii  trimisi sau default; 3-- inteligent,
+direction="d1" #sau d2
 red_time=7 #30
 yellow_time=2 #5
 green_time=5 #20
@@ -26,7 +26,7 @@ UART_bluetooth = UART(1, 9600, tx=UART_tx_bluetooth, rx=UART_rx_bluetooth)
 
 
 def UART_bluetooth_interrupt_handle(pin):
-    global UART_bluetooth, UART_bluetooth_buffer, UART_split_message, UART_new_message, direction, function_mode, red_time, yellow_time, green_time, green_time_smart
+    global UART_bluetooth, UART_bluetooth_buffer, UART_split_message, UART_new_message, direction, function_mode, red_time, yellow_time, green_time, green_time_smart, function_mode
     if UART_bluetooth.any():
         UART_bluetooth_buffer=UART_bluetooth.read().decode()
         print(UART_bluetooth_buffer)
@@ -152,7 +152,7 @@ def traffic_mode_secvential():
             
             if UART_new_message==True:
                 break
-            time.sleep(red_time-2*yellow_time)
+            time.sleep(red_time-yellow_time)
             
             
             green_light_d1.value(0)
@@ -203,7 +203,7 @@ def traffic_mode_secvential():
             
             if UART_new_message==True:
                 break
-            time.sleep(red_time-2*yellow_time)
+            time.sleep(red_time-yellow_time)
             
             
             green_light_d2.value(0)
