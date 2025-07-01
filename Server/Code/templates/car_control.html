@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Controller - Car Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+        
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+        
+        .user-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .secondary-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            background: #5a6268;
+        }
+        
+        .danger-btn {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .danger-btn:hover {
+            background: #c82333;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .control-settings {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            background-color: #ccc;
+            border-radius: 34px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .toggle-label:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-input:checked + .toggle-label {
+            background-color: #2196F3;
+        }
+        
+        .toggle-input:checked + .toggle-label:before {
+            transform: translateX(26px);
+        }
+        
+        .toggle-input:disabled + .toggle-label {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        
+        .toggle-text-off, .toggle-text-on {
+            font-weight: bold;
+            min-width: 50px;
+        }
+        
+        .toggle-text-off {
+            color: #666;
+        }
+        
+        .toggle-text-on {
+            color: #2196F3;
+        }
+        
+        .car-controls {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #333;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: #e9ecef;
+            transform: scale(1.05);
+        }
+        
+        .control-btn:active,
+        .control-btn.active {
+            background: #007bff;
+            color: white;
+            transform: scale(0.95);
+        }
+        
+        .control-btn:disabled {
+            background: #ddd;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .spacer {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .status-display {
+            text-align: center;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 6px;
+        }
+        
+        #status-message {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        #last-command {
+            font-size: 14px;
+            color: #666;
+            font-family: monospace;
+        }
+        
+        /* Color classes for button highlights */
+        .forward-active {
+            background: #28a745 !important;
+            color: white !important;
+        }
+        
+        .left-active {
+            background: #ffc107 !important;
+            color: black !important;
+        }
+        
+        .backward-active {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .right-active {
+            background: #17a2b8 !important;
+            color: white !important;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+            }
+            
+            .control-settings,
+            .car-controls {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Car Control</h1>
+            <div class="user-controls">
+                <a href="{{ url_for('control_panel') }}" class="btn secondary-btn">Back to Main</a>
+                <a href="{{ url_for('logout') }}" class="btn danger-btn">Logout</a>
+            </div>
+        </header>
+        
+        <div class="control-panel">
+            <div class="control-settings">
+                <div class="form-group">
+                    <label for="car-select">Select Car:</label>
+                    <select id="car-select" class="form-control">
+                        {% for car in cars %}
+                        <option value="{{ car }}" {% if car == selected_car %}selected{% endif %}>
+                            {{ car }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- POWER TOGGLE -->
+                <div class="form-group">
+                    <label for="car-power">Power:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="car-power" class="toggle-input">
+                        <label for="car-power" class="toggle-label"></label>
+                        <span class="toggle-text-off">OFF</span>
+                        <span class="toggle-text-on">ON</span>
+                    </div>
+                </div>
+                
+                <!-- EMERGENCY TOGGLE -->
+                <div class="form-group">
+                    <label for="emergency-toggle">Emergency:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="emergency-toggle" class="toggle-input">
+                        <label for="emergency-toggle" class="toggle-label"></label>
+                        <span class="toggle-text-off">NEUTRAL</span>
+                        <span class="toggle-text-on">E</span>
+                    </div>
+                </div>
+                
+                <!-- MODE TOGGLE (Automatic / Manual) -->
+                <div class="form-group">
+                    <label for="mode-toggle">Mode:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="mode-toggle" class="toggle-input">
+                        <label for="mode-toggle" class="toggle-label"></label>
+                        <span class="toggle-text-off">A</span>
+                        <span class="toggle-text-on">M</span>
+                    </div>
+                </div>
+		<div class="form-group">
+  <label>Road:</label>
+  <div class="toggle-switch" style="gap:8px;">
+    <button id="btn-d1" class="btn secondary-btn" disabled>D1</button>
+    <button id="btn-d2" class="btn secondary-btn" disabled>D2</button>
+  </div>
+</div>
+                
+                <div class="form-group">
+                    <label for="message-rate">Command Rate (ms):</label>
+                    <input type="number" id="message-rate" class="form-control" value="100" min="50" max="1000">
+                </div>
+            </div>
+            
+            <!-- CAR CONTROLS (WASD) -->
+            <div class="car-controls" id="controls-container">
+                <div class="controls-wrapper">
+                    <div class="control-row">
+                        <div class="spacer"></div>
+                        <button class="control-btn" id="btn-forward" data-command="w">W</button>
+                        <div class="spacer"></div>
+                    </div>
+                    <div class="control-row">
+                        <button class="control-btn" id="btn-left" data-command="a">A</button>
+                        <button class="control-btn" id="btn-backward" data-command="s">S</button>
+                        <button class="control-btn" id="btn-right" data-command="d">D</button>
+                    </div>
+                </div>
+                <div class="status-display">
+                    <div id="status-message">Ready</div>
+                    <div id="last-command">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+     <script src="{{ url_for('static', filename='js/car_control.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Controller - Control Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MQTT Controller</h1>
+            <div class="user-controls">
+                <span>Logged in as: {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn danger-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="control-options">
+            <h2>Select Control Type</h2>
+
+            <div class="option-cards">
+                <div class="option-card">
+                    <h3>Car Control</h3>
+                    <p>Control MQTT-connected vehicles</p>
+                    <a href="{{ url_for('car_control') }}" class="btn primary-btn">Select</a>
+                </div>
+
+                <div class="option-card">
+                    <h3>Traffic Light Control</h3>
+                    <p>Control MQTT-connected traffic lights</p>
+                    <a href="{{ url_for('traffic_light_control') }}" class="btn primary-btn">Select</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

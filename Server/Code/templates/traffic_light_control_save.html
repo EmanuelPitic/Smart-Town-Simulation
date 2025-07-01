@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Controller - Traffic Light Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Traffic Light Control</h1>
+            <div class="user-controls">
+                <a href="{{ url_for('control_panel') }}" class="btn secondary-btn">Back to Main</a>
+                <a href="{{ url_for('logout') }}" class="btn danger-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="control-panel">
+            <div class="control-settings">
+                <div class="form-group">
+                    <label for="traffic-light-select">Select Traffic Light:</label>
+                    <select id="traffic-light-select" class="form-control">
+                        {% for tl in traffic_lights %}
+                        <option value="{{ tl }}" {% if tl == selected_tl %}selected{% endif %}>{{ tl }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="traffic-light-mode">Mode:</label>
+                    <div class="toggle-switch mode-toggle">
+                        <input type="checkbox" id="traffic-light-mode" class="toggle-input">
+                        <label for="traffic-light-mode" class="toggle-label"></label>
+                        <span class="toggle-text-off">AUTOMATIC</span>
+                        <span class="toggle-text-on">MANUAL</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="traffic-light-controls" id="traffic-light-container">
+                <div class="traffic-light">
+                    <div class="light red" data-color="red"></div>
+                    <div class="light yellow" data-color="yellow"></div>
+                    <div class="light green" data-color="green"></div>
+                </div>
+
+                <div class="status-display">
+                    <div id="status-message">Automatic Mode</div>
+                    <div id="current-state">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/traffic_light_control.js') }}"></script>
+</body>
+</html>

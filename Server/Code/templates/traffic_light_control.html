@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MQTT Controller – Traffic Light Control</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Traffic Light Control</h1>
+      <div class="user-controls">
+        <a href="{{ url_for('control_panel') }}" class="btn secondary-btn">Back to Main</a>
+        <a href="{{ url_for('logout') }}" class="btn danger-btn">Logout</a>
+      </div>
+    </header>
+
+    <div class="control-panel">
+      <div class="control-settings">
+        <!-- 1) Select which traffic light device / topic -->
+        <div class="form-group">
+          <label for="traffic-light-select">Select Traffic Light:</label>
+          <select id="traffic-light-select" class="form-control">
+            {% for tl in traffic_lights %}
+              <option value="{{ tl }}" {% if tl == selected_tl %}selected{% endif %}>
+                {{ tl }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- 2) Mode Toggle (Manual vs Automatic) -->
+        <div class="form-group">
+          <label for="traffic-light-mode">Mode:</label>
+          <div class="toggle-switch mode-toggle">
+            <input type="checkbox" id="traffic-light-mode" class="toggle-input"/>
+            <label for="traffic-light-mode" class="toggle-label"></label>
+            <span class="toggle-text-off">AUTOMATIC</span>
+            <span class="toggle-text-on">MANUAL</span>
+          </div>
+        </div>
+
+        <!-- 3) Direction selector (always visible) -->
+        <div class="form-group">
+          <label for="direction-select">Direction:</label>
+          <select id="direction-select" class="form-control">
+            <option value="d1">d1</option>
+            <option value="d2">d2</option>
+          </select>
+        </div>
+
+        <!-- 4) Sequential‐mode timing inputs -->
+        <fieldset id="sequential-settings" style="display: none; margin-top:1rem;">
+          <legend>Sequential Mode Timers (seconds)</legend>
+          <div class="form-group">
+            <label for="red-time">Red Time:</label>
+            <input type="number" id="red-time" class="form-control" value="7" min="1"/>
+          </div>
+          <div class="form-group">
+            <label for="yellow-time">Yellow Time:</label>
+            <input type="number" id="yellow-time" class="form-control" value="2" min="1"/>
+          </div>
+          <div class="form-group">
+            <label for="green-time">Green Time:</label>
+            <input type="number" id="green-time" class="form-control" value="5" min="1"/>
+          </div>
+          <button id="apply-sequential" class="btn primary-btn">Apply Sequential</button>
+        </fieldset>
+
+        <!-- 5) Intelligent‐mode input -->
+        <fieldset id="intelligent-settings" style="display: none; margin-top:1rem;">
+          <legend>Intelligent Mode (smart‐green seconds)</legend>
+          <div class="form-group">
+            <label for="green-time-smart">Green Time (smart):</label>
+            <input type="number" id="green-time-smart" class="form-control" value="5" min="1"/>
+          </div>
+          <button id="apply-intelligent" class="btn primary-btn">Apply Intelligent</button>
+        </fieldset>
+      </div>
+
+      <div class="traffic-light-controls" id="traffic-light-container">
+        <div class="traffic-light">
+          <div class="light red" data-color="red"></div>
+          <div class="light yellow" data-color="yellow"></div>
+          <div class="light green" data-color="green"></div>
+        </div>
+
+        <div class="status-display">
+          <div id="status-message">Automatic Mode</div>
+          <div id="current-state">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/traffic_light_control.js') }}"></script>
+</body>
+</html>
+

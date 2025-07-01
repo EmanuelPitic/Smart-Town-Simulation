@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Controller - Car Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Car Control</h1>
+            <div class="user-controls">
+                <a href="{{ url_for('control_panel') }}" class="btn secondary-btn">Back to Main</a>
+                <a href="{{ url_for('logout') }}" class="btn danger-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="control-panel">
+            <div class="control-settings">
+                <div class="form-group">
+                    <label for="car-select">Select Car:</label>
+                    <select id="car-select" class="form-control">
+                        {% for car in cars %}
+                        <option value="{{ car }}" {% if car == selected_car %}selected{% endif %}>{{ car }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="car-power">Power:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="car-power" class="toggle-input">
+                        <label for="car-power" class="toggle-label"></label>
+                        <span class="toggle-text-off">OFF</span>
+                        <span class="toggle-text-on">ON</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message-rate">Command Rate (ms):</label>
+                    <input type="number" id="message-rate" class="form-control" value="100" min="50" max="1000">
+                </div>
+            </div>
+
+            <div class="car-controls" id="controls-container">
+                <div class="controls-wrapper">
+                    <div class="control-row">
+                        <div class="spacer"></div>
+                        <button class="control-btn" id="btn-forward" data-command="W">W</button>
+                        <div class="spacer"></div>
+                    </div>
+                    <div class="control-row">
+                        <button class="control-btn" id="btn-left" data-command="A">A</button>
+                        <button class="control-btn" id="btn-backward" data-command="S">S</button>
+                        <button class="control-btn" id="btn-right" data-command="D">D</button>
+                    </div>
+                </div>
+
+                <div class="status-display">
+                    <div id="status-message">Ready</div>
+                    <div id="last-command">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/car_control.js') }}"></script>
+</body>
+</html>

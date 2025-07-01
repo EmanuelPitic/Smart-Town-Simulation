@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Broker Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .tab-content {
+            border: 1px solid #dee2e6;
+            border-top: 0;
+            padding: 15px;
+        }
+        .server-controls {
+            margin-bottom: 20px;
+        }
+        .refresh-controls {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>MQTT Broker Dashboard</h1>
+
+        <div class="server-controls">
+            <div class="alert alert-info" id="server-status">
+                Server Status: {{ "Running" if server_status else "Stopped" }}
+            </div>
+            <button id="start-server" class="btn btn-success" {{ "disabled" if server_status }}>Start Server</button>
+            <button id="stop-server" class="btn btn-danger" {{ "disabled" if not server_status }}>Stop Server</button>
+        </div>
+
+        <div class="refresh-controls">
+            <button id="refresh-data" class="btn btn-primary">Refresh Data</button>
+            <span class="ms-2">Auto-refresh:</span>
+            <select id="refresh-interval" class="form-select-sm d-inline-block" style="width: auto;">
+                <option value="0">Off</option>
+                <option value="5000" selected>5 seconds</option>
+                <option value="10000">10 seconds</option>
+                <option value="30000">30 seconds</option>
+            </select>
+        </div>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="topics-tab" data-bs-toggle="tab" data-bs-target="#topics" type="button">Topic History</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button">Last Messages</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button">Connected Clients</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="subscriptions-tab" data-bs-toggle="tab" data-bs-target="#subscriptions" type="button">Subscribed Clients</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="qos-tab" data-bs-toggle="tab" data-bs-target="#qos" type="button">QoS 1/2 Messages</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Topic History Tab -->
+            <div class="tab-pane fade show active" id="topics" role="tabpanel">
+                <h3>Topic History</h3>
+                <ul id="topics-list" class="list-group">
+                    <li class="list-group-item">Loading topics...</li>
+                </ul>
+            </div>
+
+            <!-- Last Messages Tab -->
+            <div class="tab-pane fade" id="messages" role="tabpanel">
+                <h3>Last 10 Messages</h3>
+                <div class="input-group mb-3">
+                    <input type="text" id="topic-input" class="form-control" placeholder="Enter topic...">
+                    <button class="btn btn-outline-secondary" type="button" id="fetch-messages">Fetch Messages</button>
+                </div>
+                <div id="messages-content" class="border p-3 bg-light">
+                    <p class="text-muted">Enter a topic above and click "Fetch Messages"</p>
+                </div>
+            </div>
+
+            <!-- Connected Clients Tab -->
+            <div class="tab-pane fade" id="clients" role="tabpanel">
+                <h3>Connected Clients</h3>
+                <div id="clients-tree">
+                    <p>Loading clients...</p>
+                </div>
+            </div>
+
+            <!-- Subscribed Clients Tab -->
+            <div class="tab-pane fade" id="subscriptions" role="tabpanel">
+                <h3>Subscribed Clients</h3>
+                <div id="subscriptions-tree">
+                    <p>Loading subscriptions...</p>
+                </div>
+            </div>
+
+            <!-- QoS Messages Tab -->
+            <div class="tab-pane fade" id="qos" role="tabpanel">
+                <h3>QoS 1/2 Messages</h3>
+                <ul id="qos-list" class="list-group">
+                    <li class="list-group-item">Loading QoS messages...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let refreshTimer = null;
+
+        // Server control functions
+        document.getElementById('start-server').addEventListener('click', function() {
+            fetch('/server/start', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('server-status').textContent = 'Server Status: Running';
+                        document.getElementById('start-server').disabled = true;
+                        document.getElementById('stop-server').disabled = false;
+                    }
+                });
+        });
+
+        document.getElementById('stop-server').addEventListener('click', function() {
+            fetch('/server/stop', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('server-status').textContent = 'Server Status: Stopped';
+                        document.getElementById('start-server').disabled = false;
+                        document.getElementById('stop-server').disabled = true;
+                    }
+                });
+        });
+
+        // Refresh controls
+        document.getElementById('refresh-data').addEventListener('click', function() {
+            refreshAllData();
+        });
+
+        document.getElementById('refresh-interval').addEventListener('change', function() {
+            const interval = parseInt(this.value);
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+
+            if (interval > 0) {
+                refreshTimer = setInterval(refreshAllData, interval);
+            }
+        });
+
+        // Initialize auto-refresh
+        const initialInterval = parseInt(document.getElementById('refresh-interval').value);
+        if (initialInterval > 0) {
+            refreshTimer = setInterval(refreshAllData, initialInterval);
+        }
+
+        // Data loading functions
+        function refreshAllData() {
+            loadTopics();
+            loadClients();
+            loadSubscriptions();
+            loadQosMessages();
+        }
+
+        function loadTopics() {
+            fetch('/api/topics')
+                .then(response => response.json())
+                .then(data => {
+                    const topicsList = document.getElementById('topics-list');
+                    topicsList.innerHTML = '';
+
+                    if (data.length === 0) {
+                        topicsList.innerHTML = '<li class="list-group-item">No topics found</li>';
+                        return;
+                    }
+
+                    data.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.textContent = topic;
+                        topicsList.appendChild(li);
+                    });
+                });
+        }
+
+        // Message fetching
+        document.getElementById('fetch-messages').addEventListener('click', function() {
+            const topic = document.getElementById('topic-input').value;
+            if (!topic) {
+                document.getElementById('messages-content').innerHTML = '<p class="text-danger">Please enter a topic</p>';
+                return;
+            }
+
+            fetch(`/api/messages/${encodeURIComponent(topic)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const messagesContent = document.getElementById('messages-content');
+                    messagesContent.innerHTML = '';
+
+                    if (data.length === 0) {
+                        messagesContent.innerHTML = '<p>No messages found for this topic</p>';
+                        return;
+                    }
+
+                    const pre = document.createElement('pre');
+                    pre.className = 'mb-0';
+
+                    data.forEach(msg => {
+                        pre.textContent += `[${msg.published_at}] ${msg.payload}\n`;
+                    });
+
+                    messagesContent.appendChild(pre);
+                });
+        });
+
+        function loadClients() {
+            fetch('/api/clients')
+                .then(response => response.json())
+                .then(data => {
+                    const clientsTree = document.getElementById('clients-tree');
+                    clientsTree.innerHTML = '';
+
+                    if (data.length === 0) {
+                        clientsTree.innerHTML = '<p>No connected clients</p>';
+                        return;
+                    }
+
+                    const ul = document.createElement('ul');
+                    ul.className = 'list-group';
+
+                    data.forEach(client => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+
+                        const clientHeader = document.createElement('div');
+                        clientHeader.className = 'fw-bold';
+                        clientHeader.textContent = client.client_id;
+                        li.appendChild(clientHeader);
+
+                        if (client.subscriptions.length > 0) {
+                            const subList = document.createElement('ul');
+                            subList.className = 'list-group mt-2';
+
+                            client.subscriptions.forEach(sub => {
+                                const subItem = document.createElement('li');
+                                subItem.className = 'list-group-item list-group-item-light';
+                                subItem.textContent = `${sub.topic} (QoS: ${sub.qos})`;
+                                subList.appendChild(subItem);
+                            });
+
+                            li.appendChild(subList);
+                        } else {
+                            const noSubs = document.createElement('div');
+                            noSubs.className = 'text-muted mt-2';
+                            noSubs.textContent = 'No subscriptions';
+                            li.appendChild(noSubs);
+                        }
+
+                        ul.appendChild(li);
+                    });
+
+                    clientsTree.appendChild(ul);
+                });
+        }
+
+        function loadSubscriptions() {
+            fetch('/api/topics/subscribers')
+                .then(response => response.json())
+                .then(data => {
+                    const subsTree = document.getElementById('subscriptions-tree');
+                    subsTree.innerHTML = '';
+
+                    if (data.length === 0) {
+                        subsTree.innerHTML = '<p>No topics found</p>';
+                        return;
+                    }
+
+                    const ul = document.createElement('ul');
+                    ul.className = 'list-group';
+
+                    data.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+
+                        const topicHeader = document.createElement('div');
+                        topicHeader.className = 'fw-bold';
+                        topicHeader.textContent = topic.topic;
+                        li.appendChild(topicHeader);
+
+                        if (topic.subscribers.length > 0) {
+                            const subList = document.createElement('ul');
+                            subList.className = 'list-group mt-2';
+
+                            topic.subscribers.forEach(clientId => {
+                                const subItem = document.createElement('li');
+                                subItem.className = 'list-group-item list-group-item-light';
+                                subItem.textContent = clientId;
+                                subList.appendChild(subItem);
+                            });
+
+                            li.appendChild(subList);
+                        } else {
+                            const noSubs = document.createElement('div');
+                            noSubs.className = 'text-muted mt-2';
+                            noSubs.textContent = 'No subscribers';
+                            li.appendChild(noSubs);
+                        }
+
+                        ul.appendChild(li);
+                    });
+
+                    subsTree.appendChild(ul);
+                });
+        }
+
+        function loadQosMessages() {
+            fetch('/api/qos_messages')
+                .then(response => response.json())
+                .then(data => {
+                    const qosList = document.getElementById('qos-list');
+                    qosList.innerHTML = '';
+
+                    if (data.length === 0) {
+                        qosList.innerHTML = '<li class="list-group-item">No QoS 1/2 messages found</li>';
+                        return;
+                    }
+
+                    data.forEach(message => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.innerHTML = `
+                            <strong>[${message.published_at}]</strong>
+                            Topic: <span class="text-primary">${message.topic}</span>,
+                            QoS: <span class="badge bg-info">${message.qos}</span><br>
+                            <code>${message.payload}</code>
+                        `;
+                        qosList.appendChild(li);
+                    });
+                });
+        }
+
+        // Initial data load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAllData();
+        });
+    </script>
+</body>
+</html>

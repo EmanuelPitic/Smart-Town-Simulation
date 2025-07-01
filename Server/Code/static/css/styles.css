@@ -1,0 +1,380 @@
+/* static/css/styles.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --secondary-color: #f39c12;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --dark-gray: #34495e;
+    --light-gray: #ecf0f1;
+    --white: #ffffff;
+    --black: #2c3e50;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: var(--black);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--dark-gray);
+}
+
+h1 {
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+}
+
+h2 {
+    color: var(--dark-gray);
+    margin-bottom: 20px;
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.login-box {
+    max-width: 500px;
+    margin: 100px auto;
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.primary-btn {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.primary-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.secondary-btn {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+.secondary-btn:hover {
+    background-color: #e67e22;
+}
+
+.danger-btn {
+    background-color: var(--danger-color);
+    color: var(--white);
+}
+
+.danger-btn:hover {
+    background-color: #c0392b;
+}
+
+.error-message {
+    background-color: #ffecec;
+    color: var(--danger-color);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.option-cards {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.option-card {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
+
+.option-card h3 {
+    margin-bottom: 15px;
+    color: var(--primary-dark);
+}
+
+.option-card p {
+    margin-bottom: 25px;
+    color: var(--dark-gray);
+}
+
+.control-panel {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.control-settings {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.car-controls, .traffic-light-controls {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .toggle-label {
+    background-color: var(--success-color);
+}
+
+.toggle-input:checked + .toggle-label:before {
+    transform: translateX(26px);
+}
+
+.toggle-text-off, .toggle-text-on {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.toggle-text-off {
+    right: -70px;
+    color: #777;
+}
+
+.toggle-text-on {
+    left: -60px;
+    color: var(--success-color);
+    display: none;
+}
+
+.toggle-input:checked ~ .toggle-text-on {
+    display: block;
+}
+
+.toggle-input:checked ~ .toggle-text-off {
+    display: none;
+}
+
+.mode-toggle .toggle-text-off {
+    right: -100px;
+}
+
+.mode-toggle .toggle-text-on {
+    left: -80px;
+}
+
+.controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-row {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: var(--dark-gray);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background-color: var(--primary-color);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+    background-color: var(--primary-dark);
+}
+
+.spacer {
+    width: 80px;
+    height: 80px;
+}
+
+.status-display {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+.status-display div {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.traffic-light {
+    background-color: var(--dark-gray);
+    width: 120px;
+    height: 320px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.light {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    opacity: 0.3;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.light:hover {
+    opacity: 0.7;
+}
+
+.light.active {
+    opacity: 1;
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.2);
+}
+
+.light.red {
+    background-color: #e74c3c;
+}
+
+.light.yellow {
+    background-color: #f39c12;
+}
+
+.light.green {
+    background-color: #2ecc71;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .option-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .control-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .user-controls {
+        flex-direction: column;
+    }
+}
