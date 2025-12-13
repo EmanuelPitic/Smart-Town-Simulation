@@ -5,3 +5,4 @@ Acest proiect a fost realizat de:
 - Bîrleanu Andreea
 - Pitic Emanuel
 - Stroici Andrei
+- Voicu Gabriel
